@@ -27,11 +27,14 @@ public class TaxiAgent extends Agent {
         try {DFService.register(this, dfd);}
         catch (FIPAException fe) {fe.printStackTrace();}
 
+        /*
         addBehaviour(new CyclicBehaviour(this) {
             @Override
             public void action() {
                 // Do stuff
             }
         });
+
+         */
     }
 }
