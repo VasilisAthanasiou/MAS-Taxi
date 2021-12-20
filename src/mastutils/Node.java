@@ -6,15 +6,27 @@ public class Node {
     String location;
     float sGlobal;
     float sLocal;
-    ArrayList<Node> neighbours;
+    public ArrayList<Node> neighbours;
+    public ArrayList<Integer> edgeCost; // Cost to neighbour
     Node parent;
 
-    public Node(String loc, ArrayList<Node> nb, Node par){
+    public Node(String loc){
         location = loc;
+        neighbours = new ArrayList<Node>();
+        edgeCost = new ArrayList<Integer>();
         sGlobal = Float.MAX_VALUE;
         sLocal = Float.MAX_VALUE;
-        neighbours = nb; // CAREFUL with assigning arraylists
-        parent = par;
+        parent = null;
     }
+
+    public String getLocation(){
+        return this.location;
+    }
+
+//    public ArrayList<Integer> getEdgeCost(){
+//        return this.edgeCost;
+//    }
+
+
 
 }

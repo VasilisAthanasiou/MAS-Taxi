@@ -31,8 +31,7 @@ public class World extends Agent {
     private String[] discreteLoc = {"00", "40", "34", "04"};
     ArrayList<String> locations = new ArrayList<String>();
     int iteration = 0;
-    Node [][] graph;
-
+    Node [][] worldGraph;
 
 
     public void setup(){
@@ -55,6 +54,10 @@ public class World extends Agent {
         System.out.println("Found:");
         for (int i = 0; i < numberOfAgents; ++i) System.out.println(agentArray[i]);
         setLocations();
+
+        // Create World graph
+        worldGraph = new Node[x][y];
+        createGraph();
 
         addBehaviour(new CyclicBehaviour(this) {
             @Override
@@ -103,16 +106,65 @@ public class World extends Agent {
         return;
     }
 
-    // Create a graph representation of the World
+    /* ------------------------------------------- Create a graph representation of the World --------------------------------------------- */
     public void createGraph(){
+
+        // First initialize all nodes and add them to the world graph
         for (int j = 0; j < y; j++) {
             for (int i = 0; i < x; i++) {
-                // TODO : Check notes
+                Node worldNode = new Node(String.valueOf(i) + String.valueOf(j));
+                worldGraph[i][j] = worldNode;
             }
         }
-    }
 
-    // Function meant to draw the world and the agents on it. Agents are represented by their numbers and customers by an asterisk (*)
+        // Connect all nodes add assign a cost of 1 on every edge
+        for (int j = 0; j < y; j++) {
+            for (int i = 0; i < x; i++) {
+                // If node is not on left edge. Set left neighbour
+                if(i > 0){
+                    worldGraph[i][j].neighbours.add(worldGraph[i - 1][j]);
+                    worldGraph[i][j].edgeCost.add(1);
+                }
+                // If node is not on right edge. Set right neighbour
+                if(i < x - 1){
+                    worldGraph[i][j].neighbours.add(worldGraph[i + 1][j]);
+                    worldGraph[i][j].edgeCost.add(1);
+                }
+                // If node is not on top edge. Set top neighbour
+                if(j > 0){
+                    worldGraph[i][j].neighbours.add(worldGraph[i][j - 1]);
+                    worldGraph[i][j].edgeCost.add(1);
+                }
+                // If node is not on bottom edge. Set bottom neighbour
+                if(j < y - 1){
+                    worldGraph[i][j].neighbours.add(worldGraph[i][j + 1]);
+                    worldGraph[i][j].edgeCost.add(1);
+                }
+            }
+        }
+        // Hard code walls
+        worldGraph[0][3].edgeCost.set(0, 100);
+        worldGraph[1][3].edgeCost.set(0, 100);
+
+        worldGraph[0][4].edgeCost.set(0, 100);
+        worldGraph[1][4].edgeCost.set(0, 100);
+
+        worldGraph[1][0].edgeCost.set(1, 100);
+        worldGraph[2][0].edgeCost.set(0, 100);
+
+        worldGraph[1][1].edgeCost.set(1 , 100);
+        worldGraph[2][1].edgeCost.set(0 , 100);
+
+        worldGraph[2][3].edgeCost.set(1, 100);
+        worldGraph[3][3].edgeCost.set(0, 100);
+
+        worldGraph[2][4].edgeCost.set(1, 100);
+        worldGraph[3][4].edgeCost.set(0, 100);
+
+    }
+    /* ---------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+    /* ------- Function meant to draw the world and the agents on it. Agents are represented by their numbers and customers by an asterisk (*) ------------ */
     private void draw(){
         int xClient = locations.get(0).charAt(0) - '0';
         int yClient = locations.get(0).charAt(1) - '0';
@@ -138,8 +190,20 @@ public class World extends Agent {
                 else{
                     line += "[   ]";
                 }
+
+                // Print Nodes and neighbours
+                System.out.printf("Node " + worldGraph[i][j].getLocation() + " has these neighbours and the respective costs to them: ");
+                for(Node neighbour : worldGraph[i][j].neighbours){
+                    System.out.printf(neighbour.getLocation() + " ");
+                }
+                System.out.printf(" | ");
+                for(Integer cost : worldGraph[i][j].edgeCost){
+                    System.out.printf(cost + " ");
+                }
+                System.out.println();
             }
-            System.out.println(line);
+            //System.out.println(line);
+            System.out.println();
         }
         System.out.println();
     }
