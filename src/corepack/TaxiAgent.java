@@ -2,7 +2,8 @@ package corepack;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.*;
+
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -14,8 +15,10 @@ import jade.lang.acl.ACLMessage;
 
 public class TaxiAgent extends Agent {
 
+    public void setup(){
 
-    protected void setup(){
+        System.out.println("Agent " + getLocalName() + " is online");
+
         // Register agent to directory facilitator
         DFAgentDescription dfd = new DFAgentDescription();
         // Agent id
@@ -27,14 +30,26 @@ public class TaxiAgent extends Agent {
         try {DFService.register(this, dfd);}
         catch (FIPAException fe) {fe.printStackTrace();}
 
-        /*
         addBehaviour(new CyclicBehaviour(this) {
-            @Override
             public void action() {
-                // Do stuff
+                ACLMessage msg = null;
+                // Waiting to receive message
+                msg = blockingReceive();
+
+                // Receive client location and plan route
+                if(!msg.getContent().isEmpty() && !msg.getContent().equals("Terminate")){
+                    //System.out.println("Agent must go to location : " + msg.getContent());
+                }
+                else if(msg.getContent().equals("Terminate")){
+                    //System.out.println("Agent : " + getLocalName() +" has terminated");
+                    // Take down from registry
+                    takeDown();
+                    // Terminate
+                    doDelete();
+                }
             }
         });
 
-         */
+
     }
 }
