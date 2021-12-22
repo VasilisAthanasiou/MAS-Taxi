@@ -24,18 +24,20 @@ public class World extends Agent {
     private int numberOfAgents;
 
     // World fields
-    private int x = 5;
-    private int y = 5;
-    private String[][] grid;
-    private String[] discreteLoc = {"00", "40", "34", "04"};
-    ArrayList<String> locations = new ArrayList<String>();
+    final private int x = 5;
+    final private int y = 5;
+    final private String[] discreteLoc = {"00", "40", "34", "04"};
+    ArrayList<String> locations = new ArrayList<>();
     int iteration = 0;
     Node [][] worldGraph;
-    Stack<String> messageStack = new Stack<String>();
+    Stack<String> messageStack = new Stack<>();
 
 
     public void setup(){
-        try {Thread.sleep(50);} catch (InterruptedException ie) {} // Make sure all agents are initialized
+        try {Thread.sleep(50);} catch (InterruptedException ie) { // Make sure all agents are initialized
+            System.out.println(ie);
+        }
+
         // Search the registry for agents
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
@@ -72,7 +74,7 @@ public class World extends Agent {
         addBehaviour(new CyclicBehaviour(this) {
             @Override
             public void action() {
-                try {Thread.sleep(50);} catch (InterruptedException ie) {}
+                try {Thread.sleep(50);} catch (InterruptedException ie) {System.out.println(ie);}
 
                 // Make sure there are messages to be sent
                 if(!messageStack.isEmpty()){
@@ -83,7 +85,7 @@ public class World extends Agent {
                             break;
                         case "SEND_LOCATIONS":
                             System.out.println("World will send locations to Taxi Agent");
-                            sendMessage("LOCATIONS");
+                            sendLocations(locations.get(1), locations.get(0)); // TODO : Will need to refactor this to work with more agents
                             break;
                         case "PLAN":
                             System.out.println("World asks Taxi Agent to start planning");
@@ -120,6 +122,11 @@ public class World extends Agent {
         }
     }
 
+    private void sendLocations(String agentLoc, String goalLoc){
+        String msg = "LOCATIONS," +agentLoc + "," + goalLoc;
+        sendMessage(msg);
+    }
+
     /* -------------------------------------------------------------------------------------------------------------------- */
 
     /* --------------------------------------- World Functions ------------------------------------------------------------ */
@@ -134,6 +141,7 @@ public class World extends Agent {
 
         return;
     }
+
     private void setLocations(boolean setAgents, String exclude){
         Random rand = new Random();
         String location;
@@ -156,7 +164,7 @@ public class World extends Agent {
         return;
     }
 
-    /* ------------------------------------------- Create a graph representation of the World --------------------------------------------- */
+    /* ----------------------------------------- Create a graph representation of the World --------------------------------------------- */
     public void createGraph(){
 
         // First initialize all nodes and add them to the world graph
@@ -217,6 +225,7 @@ public class World extends Agent {
 
     /* ------- Function meant to draw the world and the agents on it. Agents are represented by their numbers and customers by an asterisk (*) ------------ */
     private void draw(){
+
         int xClient = locations.get(0).charAt(0) - '0';
         int yClient = locations.get(0).charAt(1) - '0';
 
