@@ -2,7 +2,6 @@ package corepack;
 
 import jade.core.Agent;
 import jade.core.AID;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -13,9 +12,9 @@ import jade.lang.acl.ACLMessage;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import mastutils.Node;
-
 
 
 public class World extends Agent {
@@ -32,6 +31,7 @@ public class World extends Agent {
     ArrayList<String> locations = new ArrayList<String>();
     int iteration = 0;
     Node [][] worldGraph;
+    Stack<String> messageStack = new Stack<String>();
 
 
     public void setup(){
@@ -53,55 +53,105 @@ public class World extends Agent {
         Arrays.sort(agentArray);
         System.out.println("Found:");
         for (int i = 0; i < numberOfAgents; ++i) System.out.println(agentArray[i]);
-        setLocations();
+
+        // Initialize the locations of the agents and the client
+        setLocations(true, "");
+        // Set clients destination
+        setLocations(false, locations.get(0));
 
         // Create World graph
         worldGraph = new Node[x][y];
         createGraph();
 
+        // Draw the World for the first time
+        draw();
+
+        // Initialize the message stack
+        setMessageStack();
+
         addBehaviour(new CyclicBehaviour(this) {
             @Override
             public void action() {
                 try {Thread.sleep(50);} catch (InterruptedException ie) {}
-                // Send client location to any agent
-                if(iteration < 5){
-                    for (String agentName: agentArray) {
-                        ACLMessage message = new ACLMessage(ACLMessage.INFORM);
-                        // Refer to receiver by local name
-                        message.addReceiver(new AID(agentName, AID.ISLOCALNAME));
-                        message.setContent(locations.get(0));
-                        send(message);
+
+                // Make sure there are messages to be sent
+                if(!messageStack.isEmpty()){
+                    switch (messageStack.pop()){
+                        case "SEND_GRAPH":
+                            System.out.println("World will send graph to Taxi Agent");
+                            sendMessage("GRAPH");
+                            break;
+                        case "SEND_LOCATIONS":
+                            System.out.println("World will send locations to Taxi Agent");
+                            sendMessage("LOCATIONS");
+                            break;
+                        case "PLAN":
+                            System.out.println("World asks Taxi Agent to start planning");
+                            sendMessage("PLAN");
+                            break;
+                        case "EXECUTE":
+                            System.out.println("World asks Taxi Agent to execute plan");
+                            sendMessage("EXECUTE");
+                            break;
+                        case "SET_STACK":
+                            System.out.println("World will set it's stack");
+                            break;
                     }
                 }
                 else{
-                    for (String agentName: agentArray) {
-                        ACLMessage message = new ACLMessage(ACLMessage.INFORM);
-                        // Refer to receiver by local name
-                        message.addReceiver(new AID(agentName, AID.ISLOCALNAME));
-                        message.setContent("Terminate");
-                        send(message);
-                    }
+                    sendMessage("TERMINATE");
                     doDelete();
                 }
-                draw();
-                iteration++;
             }
         });
 
     }
 
-    private void setLocations(){
+    /* --------------------------------------- JADE Functions --------------------------------------------------------------*/
+
+    // Sends a message of type String
+    private void sendMessage(String content){
+        for (String agentName: agentArray) {
+            ACLMessage message = new ACLMessage(ACLMessage.INFORM);
+            // Refer to receiver by local name
+            message.addReceiver(new AID(agentName, AID.ISLOCALNAME));
+            message.setContent(content);
+            send(message);
+        }
+    }
+
+    /* -------------------------------------------------------------------------------------------------------------------- */
+
+    /* --------------------------------------- World Functions ------------------------------------------------------------ */
+
+    // This will be a hardcoded set of messages the World agent will have to communicate to a TaxiAgent
+    private void setMessageStack(){
+        messageStack.push("SET_STACK");
+        messageStack.push("EXECUTE");
+        messageStack.push("PLAN");
+        messageStack.push("SEND_LOCATIONS");
+        messageStack.push("SEND_GRAPH");
+
+        return;
+    }
+    private void setLocations(boolean setAgents, String exclude){
         Random rand = new Random();
         String location;
+
         // Set random client location
-        locations.add(discreteLoc[rand.nextInt(4)]);
-        // Set random agent locations
-        for(int i = 0; i < numberOfAgents; i++) {
-            location = String.valueOf(rand.nextInt(4)); // Beware of reassigned variable
-            location += String.valueOf(rand.nextInt(4));
-            if(location.length() == 1)
-                location = "0" + location;
-            locations.add(location);
+        while(true){
+            location = discreteLoc[rand.nextInt(4)];
+            if(!location.equals(exclude)){break;}
+        }
+        locations.add(location);
+
+        if (setAgents) {
+            // Set random agent locations
+            for (int i = 0; i < numberOfAgents; i++) {
+                location = String.valueOf(rand.nextInt(4)); // Beware of reassigned variable
+                location += String.valueOf(rand.nextInt(4));
+                locations.add(location);
+            }
         }
         return;
     }
@@ -161,6 +211,7 @@ public class World extends Agent {
         worldGraph[2][4].edgeCost.set(1, 100);
         worldGraph[3][4].edgeCost.set(0, 100);
 
+        return;
     }
     /* ---------------------------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -206,5 +257,7 @@ public class World extends Agent {
             System.out.println();
         }
         System.out.println();
+
+        return;
     }
 }

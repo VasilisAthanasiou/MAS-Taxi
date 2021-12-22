@@ -36,20 +36,36 @@ public class TaxiAgent extends Agent {
                 // Waiting to receive message
                 msg = blockingReceive();
 
-                // Receive client location and plan route
-                if(!msg.getContent().isEmpty() && !msg.getContent().equals("Terminate")){
-                    //System.out.println("Agent must go to location : " + msg.getContent());
-                }
-                else if(msg.getContent().equals("Terminate")){
-                    //System.out.println("Agent : " + getLocalName() +" has terminated");
-                    // Take down from registry
-                    takeDown();
-                    // Terminate
-                    doDelete();
+                switch (msg.getContent()){
+                    case "PLAN":
+                        System.out.println(getLocalName() + " will start planning\n");
+                        break;
+                    case "EXECUTE":
+                        System.out.println(getLocalName() + " will execute plan\n");
+                        break;
+                    case "TERMINATE":
+                        System.out.println(getLocalName() + " is terminating");
+                        // Terminate agent
+                        takeDown();
+                        doDelete();
+                        break;
                 }
             }
         });
+    }
 
+    // Sends a message of type String
+    private void sendMessage(String content){
+
+        ACLMessage message = new ACLMessage(ACLMessage.INFORM);
+        // Refer to receiver by local name
+        message.addReceiver(new AID("World", AID.ISLOCALNAME));
+        message.setContent(content);
+        send(message);
 
     }
+
+
+
+
 }
