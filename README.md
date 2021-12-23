@@ -15,34 +15,34 @@ Multi Agent Taxi. This is a school assignment.
 - To run the main container and a custom taxi agent run ``java -cp .\lib\jade.jar jade.Boot -agents <any name>:corepack.TaxiAgent <any name>:corepack.World``
 
 
-#Architecture
+# Architecture
 
 ---
-#Agent
+# Agent
 
 ---
 
-##Actions
+## Actions
 
 ---
 - MOVE (UP, DOWN, LEFT, RIGHT)
 - INTERACT (PICK, PLACE) - Pick up and place client (NOT IMPLEMENTED)
 
-##Beliefs
+## Beliefs
 
 ---
 - Agent has a graph representation of the world in its knowledge base
 - Agent learns of clients location via messages from environment.
 
 
-##Desires
+## Desires
 
 ---
 - Find client / Pick up on empty cell 
 - Deliver client  
 - Don't crash on wall 
 
-##Intentions
+## Intentions
 
 ---
 - ACT
