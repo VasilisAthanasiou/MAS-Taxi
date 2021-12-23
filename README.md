@@ -12,13 +12,12 @@ Multi Agent Taxi. This is a school assignment.
 - >After an agent is compiled add the .class file to /lib/jade.jar under corepack using WINRAR.
 
 ## Running Main Container and custom agent
-- To run the main container and a custom taxi agent run ``java -cp .\lib\jade.jar jade.Boot -gui -agents <any name>:corepack.TaxiAgent``
+- To run the main container and a custom taxi agent run ``java -cp .\lib\jade.jar jade.Boot -agents <any name>:corepack.TaxiAgent <any name>:corepack.World``
 
 
 #Architecture
 
 ---
-
 #Agent
 
 ---
@@ -26,34 +25,30 @@ Multi Agent Taxi. This is a school assignment.
 ##Actions
 
 ---
-### Conscious
 - MOVE (UP, DOWN, LEFT, RIGHT)
-- INTERACT (PICK, PLACE) - Pick up and place client
-### Unconscious
-- SEE (3x3 Kernel)
+- INTERACT (PICK, PLACE) - Pick up and place client (NOT IMPLEMENTED)
 
->Conscious actions cost 1 point. Unconscious actions are free.
 ##Beliefs
 
 ---
-- Agent doesn't know where the walls are initially.
+- Agent has a graph representation of the world in its knowledge base
 - Agent learns of clients location via messages from environment.
-- Agent remembers previous best paths to goals (Hard to implement. May not implement).
+
 
 ##Desires
 
 ---
-- Find client / Pick up on empty cell (-10)
-- Deliver client (+20) / Place client to wrong location (-10)
-- Don't crash on wall / Crashing on a wall costs (-100)
+- Find client / Pick up on empty cell 
+- Deliver client  
+- Don't crash on wall 
 
 ##Intentions
 
 ---
 - ACT
-  (Perform conscious actions)
-- THINK
-  (Compute optimal path for goal)
+  (Perform actions)
+- PLAN
+  (Compute optimal path for goal using A* Algorithm)
 
 
 

@@ -18,9 +18,11 @@ import mastutils.AStar;
 
 public class TaxiAgent extends Agent {
 
+    // AGENTS BELIEF SYSTEM OR KNOWLEDGE BASE
     ArrayList<String> actionList = new ArrayList<String>();
     String []locations = new String[2]; // 0 : Agent, 1 : Goal
     Node [][] worldGraph;
+    // ----------------------------------------------------
 
     public void setup(){
 
@@ -94,12 +96,12 @@ public class TaxiAgent extends Agent {
     }
 
 
-
     private void updateLocations(String agent, String goal){
         locations[0] = agent;
         locations[1] = goal;
     }
 
+    // The action stack represents the agents Intents
     private void setActionStack(Stack<String> path){
         String initial = path.pop();
         int x = initial.charAt(0) - '0';
