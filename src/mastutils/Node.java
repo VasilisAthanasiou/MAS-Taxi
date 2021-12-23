@@ -1,22 +1,25 @@
 package mastutils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Node {
+public class Node implements Serializable {
     String location;
-    float sGlobal;
-    float sLocal;
+    double sGlobal;
+    double sLocal;
     public ArrayList<Node> neighbours;
     public ArrayList<Integer> edgeCost; // Cost to neighbour
     Node parent;
+    public boolean isVisited;
 
     public Node(String loc){
         location = loc;
         neighbours = new ArrayList<Node>();
         edgeCost = new ArrayList<Integer>();
-        sGlobal = Float.MAX_VALUE;
-        sLocal = Float.MAX_VALUE;
+        sGlobal = Double.MAX_VALUE;
+        sLocal = Double.MAX_VALUE;
         parent = null;
+        isVisited = false;
     }
 
     public String getLocation(){

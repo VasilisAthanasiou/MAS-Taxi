@@ -9,6 +9,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class World extends Agent {
     final private int x = 5;
     final private int y = 5;
     final private String[] discreteLoc = {"00", "40", "34", "04"};
-    ArrayList<String> locations = new ArrayList<>();
+    ArrayList<String> locations = new ArrayList<>(); // 0 : Client Location | 1,2,..,n : Agents locations | n - 1 : Client Destination Location
     int iteration = 0;
     Node [][] worldGraph;
     Stack<String> messageStack = new Stack<>();
@@ -76,12 +78,26 @@ public class World extends Agent {
             public void action() {
                 try {Thread.sleep(50);} catch (InterruptedException ie) {System.out.println(ie);}
 
+                ACLMessage msg;
+                msg = receive();
+                // Make sure if there are any messages to be read
+                if (!(msg == null)){
+                    // If the message is an action message, update agents position in World
+                    while(msg.getContent().contains("ACTION")){
+                        String []action = msg.getContent().split(":", 2);
+                        System.out.println(msg.getContent());
+                        resolveUpdatedLocation(action[1], 1);
+                        draw();
+                        try {Thread.sleep(50);} catch (InterruptedException ie) {System.out.println(ie);}
+                        msg = receive();
+                    }
+                }
                 // Make sure there are messages to be sent
-                if(!messageStack.isEmpty()){
+                else if(!messageStack.isEmpty()){
                     switch (messageStack.pop()){
                         case "SEND_GRAPH":
                             System.out.println("World will send graph to Taxi Agent");
-                            sendMessage("GRAPH");
+                            sendObject(worldGraph);
                             break;
                         case "SEND_LOCATIONS":
                             System.out.println("World will send locations to Taxi Agent");
@@ -122,9 +138,46 @@ public class World extends Agent {
         }
     }
 
+    private void sendObject(Serializable obj){
+        for (String agentName: agentArray) {
+            ACLMessage message = new ACLMessage(ACLMessage.INFORM);
+            // Refer to receiver by local name
+            message.addReceiver(new AID(agentName, AID.ISLOCALNAME));
+            try {
+                message.setContentObject(obj);
+            }catch (IOException io){};
+            send(message);
+        }
+    }
+
     private void sendLocations(String agentLoc, String goalLoc){
         String msg = "LOCATIONS," +agentLoc + "," + goalLoc;
         sendMessage(msg);
+    }
+
+    private void resolveUpdatedLocation(String move, int agentIndex){
+
+        int xAgent = locations.get(agentIndex).charAt(0) - '0';
+        int yAgent = locations.get(agentIndex).charAt(1) - '0';
+
+        switch (move){
+            case "UP":
+                yAgent--;
+                locations.set(agentIndex, locations.get(agentIndex).charAt(0) + String.valueOf(yAgent));
+                return;
+            case "DOWN":
+                yAgent++;
+                locations.set(agentIndex, locations.get(agentIndex).charAt(0) + String.valueOf(yAgent));
+                return;
+            case "LEFT":
+                xAgent--;
+                locations.set(agentIndex, String.valueOf(xAgent) + locations.get(agentIndex).charAt(1));
+                return;
+            case "RIGHT":
+                xAgent++;
+                locations.set(agentIndex, String.valueOf(xAgent) + locations.get(agentIndex).charAt(1));
+                return;
+        }
     }
 
     /* -------------------------------------------------------------------------------------------------------------------- */
@@ -251,19 +304,19 @@ public class World extends Agent {
                     line += "[   ]";
                 }
 
-                // Print Nodes and neighbours
-                System.out.printf("Node " + worldGraph[i][j].getLocation() + " has these neighbours and the respective costs to them: ");
-                for(Node neighbour : worldGraph[i][j].neighbours){
-                    System.out.printf(neighbour.getLocation() + " ");
-                }
-                System.out.printf(" | ");
-                for(Integer cost : worldGraph[i][j].edgeCost){
-                    System.out.printf(cost + " ");
-                }
-                System.out.println();
+//                // Print Nodes and neighbours
+//                System.out.printf("Node " + worldGraph[i][j].getLocation() + " has these neighbours and the respective costs to them: ");
+//                for(Node neighbour : worldGraph[i][j].neighbours){
+//                    System.out.printf(neighbour.getLocation() + " ");
+//                }
+//                System.out.printf(" | ");
+//                for(Integer cost : worldGraph[i][j].edgeCost){
+//                    System.out.printf(cost + " ");
+//                }
+//                System.out.println();
             }
-            //System.out.println(line);
-            System.out.println();
+            System.out.println(line);
+            // System.out.println();
         }
         System.out.println();
 
