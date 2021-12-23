@@ -23,7 +23,6 @@ public class AStar {
         Node currentNode = startNode;
         currentNode.sLocal = 0;
         currentNode.sGlobal = euclideanDist(startNode, goalNode);
-
         // Initialize test list and add the start node
         ArrayList<Node> notTestedNodes = new ArrayList<>();
         notTestedNodes.add(startNode);
@@ -47,19 +46,21 @@ public class AStar {
             currentNode.isVisited = true;
 
             // Add current node's neighbours on the list
-            for (Node nodeNeighbour : currentNode.neighbours) {
+            for(int i = 0; i < currentNode.neighbours.size(); i++){
                 // Add a neighbour to the list
-                notTestedNodes.add(nodeNeighbour);
+                if(!currentNode.neighbours.get(i).isVisited)
+                    notTestedNodes.add(currentNode.neighbours.get(i));
 
                 // Calculate neighbours potential lowest parent distance
-                double localGoal = currentNode.sLocal + euclideanDist(currentNode, nodeNeighbour);
+                double localGoal = currentNode.sLocal + euclideanDist(currentNode, currentNode.neighbours.get(i)) + currentNode.edgeCost.get(i);
 
-                if(localGoal < nodeNeighbour.sLocal){
-                    nodeNeighbour.parent = currentNode;
-                    nodeNeighbour.sLocal = localGoal;
+                if(localGoal < currentNode.neighbours.get(i).sLocal){
+                    currentNode.neighbours.get(i).parent = currentNode;
+                    currentNode.neighbours.get(i).sLocal = localGoal;
 
                     // Change neighbours global score
-                    nodeNeighbour.sGlobal = nodeNeighbour.sLocal + euclideanDist(nodeNeighbour, goalNode);
+                    currentNode.neighbours.get(i).setsGlobal(currentNode.neighbours.get(i).sLocal + euclideanDist(currentNode.neighbours.get(i), goalNode ));
+
                 }
             }
         }
@@ -69,20 +70,23 @@ public class AStar {
         path.push(goalNode.location);
 
         currentNode = goalNode;
-        while(!currentNode.location.equals(startNode.location)){
-            path.push(currentNode.parent.location);
+        while(!currentNode.location.equals(startNode.location) && currentNode.isVisited){
+            path.push(currentNode.parent.getLocation());
+            System.out.println("Parent of " + currentNode.getLocation() + " = " + currentNode.parent.getLocation());
             currentNode = currentNode.parent;
+        }
+        for (String loc : path) {
+            System.out.println(loc);
         }
 
         return path;
     }
 
     private double euclideanDist(Node a, Node b){
-        double x1 = Double.valueOf(a.location.indexOf(0));
-        double y1 = Double.valueOf(a.location.indexOf(1));
-        double x2 = Double.valueOf(b.location.indexOf(0));
-        double y2 = Double.valueOf(b.location.indexOf(1));
-
+        double x1 = (double)a.location.charAt(0) - '0';
+        double y1 = (double)a.location.charAt(1) - '0';
+        double x2 = (double)b.location.charAt(0) - '0';
+        double y2 = (double)b.location.charAt(1) - '0';
 
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }

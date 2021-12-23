@@ -234,43 +234,43 @@ public class World extends Agent {
                 // If node is not on left edge. Set left neighbour
                 if(i > 0){
                     worldGraph[i][j].neighbours.add(worldGraph[i - 1][j]);
-                    worldGraph[i][j].edgeCost.add(1);
+                    worldGraph[i][j].edgeCost.add(1.);
                 }
                 // If node is not on right edge. Set right neighbour
                 if(i < x - 1){
                     worldGraph[i][j].neighbours.add(worldGraph[i + 1][j]);
-                    worldGraph[i][j].edgeCost.add(1);
+                    worldGraph[i][j].edgeCost.add(1.);
                 }
                 // If node is not on top edge. Set top neighbour
                 if(j > 0){
                     worldGraph[i][j].neighbours.add(worldGraph[i][j - 1]);
-                    worldGraph[i][j].edgeCost.add(1);
+                    worldGraph[i][j].edgeCost.add(1.);
                 }
                 // If node is not on bottom edge. Set bottom neighbour
                 if(j < y - 1){
                     worldGraph[i][j].neighbours.add(worldGraph[i][j + 1]);
-                    worldGraph[i][j].edgeCost.add(1);
+                    worldGraph[i][j].edgeCost.add(1.);
                 }
             }
         }
-        // Hard code walls
-        worldGraph[0][3].edgeCost.set(0, 100);
-        worldGraph[1][3].edgeCost.set(0, 100);
+        // Hard code walls.
+        worldGraph[0][3].edgeCost.set(0, 100.);
+        worldGraph[1][3].edgeCost.set(0, 100.);
 
-        worldGraph[0][4].edgeCost.set(0, 100);
-        worldGraph[1][4].edgeCost.set(0, 100);
+        worldGraph[0][4].edgeCost.set(0, 100.);
+        worldGraph[1][4].edgeCost.set(0, 100.);
 
-        worldGraph[1][0].edgeCost.set(1, 100);
-        worldGraph[2][0].edgeCost.set(0, 100);
+        worldGraph[1][0].edgeCost.set(1, 100.);
+        worldGraph[2][0].edgeCost.set(0, 100.);
 
-        worldGraph[1][1].edgeCost.set(1 , 100);
-        worldGraph[2][1].edgeCost.set(0 , 100);
+        worldGraph[1][1].edgeCost.set(1 , 100.);
+        worldGraph[2][1].edgeCost.set(0 , 100.);
 
-        worldGraph[2][3].edgeCost.set(1, 100);
-        worldGraph[3][3].edgeCost.set(0, 100);
+        worldGraph[2][3].edgeCost.set(1, 100.);
+        worldGraph[3][3].edgeCost.set(0, 100.);
 
-        worldGraph[2][4].edgeCost.set(1, 100);
-        worldGraph[3][4].edgeCost.set(0, 100);
+        worldGraph[2][4].edgeCost.set(1, 100.);
+        worldGraph[3][4].edgeCost.set(0, 100.);
 
         return;
     }

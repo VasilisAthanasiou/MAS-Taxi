@@ -8,16 +8,16 @@ public class Node implements Serializable {
     double sGlobal;
     double sLocal;
     public ArrayList<Node> neighbours;
-    public ArrayList<Integer> edgeCost; // Cost to neighbour
+    public ArrayList<Double> edgeCost; // Cost to neighbour
     Node parent;
     public boolean isVisited;
 
     public Node(String loc){
         location = loc;
         neighbours = new ArrayList<Node>();
-        edgeCost = new ArrayList<Integer>();
-        sGlobal = Double.MAX_VALUE;
-        sLocal = Double.MAX_VALUE;
+        edgeCost = new ArrayList<Double>();
+        sGlobal = 10000.;
+        sLocal = 10000.;
         parent = null;
         isVisited = false;
     }
@@ -29,6 +29,9 @@ public class Node implements Serializable {
 //    public ArrayList<Integer> getEdgeCost(){
 //        return this.edgeCost;
 //    }
+    public void setsGlobal(double value){
+        sGlobal = value;
+    }
 
 
 

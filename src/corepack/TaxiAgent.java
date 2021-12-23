@@ -8,6 +8,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
 import java.util.Stack;
 import jade.lang.acl.UnreadableException;
 
@@ -16,7 +18,7 @@ import mastutils.AStar;
 
 public class TaxiAgent extends Agent {
 
-    Stack<String> actionStack = new Stack<String>();
+    ArrayList<String> actionList = new ArrayList<String>();
     String []locations = new String[2]; // 0 : Agent, 1 : Goal
     Node [][] worldGraph;
 
@@ -99,26 +101,29 @@ public class TaxiAgent extends Agent {
     }
 
     private void setActionStack(Stack<String> path){
-        int x = Integer.valueOf(locations[0].charAt(0));
-        int y = Integer.valueOf(locations[0].charAt(1));
+        String initial = path.pop();
+        int x = initial.charAt(0) - '0';
+        int y = initial.charAt(1) - '0';
 
+        System.out.println(x + " " + y);
 
         while(!path.isEmpty()){
             String next = path.pop();
-            if(x < Integer.valueOf(next.charAt(0))){
-                actionStack.push("RIGHT");
+
+            if(x < next.charAt(0) - '0'){
+                actionList.add("RIGHT");
             }
-            if(x > Integer.valueOf(next.charAt(0))){
-                actionStack.push("LEFT");
+            if(x > next.charAt(0) - '0'){
+                actionList.add("LEFT");
             }
-            if(y > Integer.valueOf(next.charAt(1))){
-                actionStack.push("UP");
+            if(y > next.charAt(1) - '0'){
+                actionList.add("UP");
             }
-            if(y < Integer.valueOf(next.charAt(1))){
-                actionStack.push("DOWN");
+            if(y < next.charAt(1) - '0'){
+                actionList.add("DOWN");
             }
-            x = Integer.valueOf(next.charAt(0));
-            y = Integer.valueOf(next.charAt(1));
+            x = next.charAt(0) - '0';
+            y = next.charAt(1) - '0';
         }
     }
 
@@ -128,9 +133,9 @@ public class TaxiAgent extends Agent {
     }
 
     private void executeActions(){
-        while(!actionStack.isEmpty())
-            act(actionStack.pop());
-
+        for (String action : actionList) {
+            act(action);
+        }
         sendMessage("DONE");
     }
 
