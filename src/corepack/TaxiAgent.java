@@ -22,11 +22,13 @@ public class TaxiAgent extends Agent {
     ArrayList<String> actionList = new ArrayList<String>();
     String []locations = new String[2]; // 0 : Agent, 1 : Goal
     Node [][] worldGraph;
+    int credits;
     // ----------------------------------------------------
 
     public void setup(){
 
         System.out.println("Agent " + getLocalName() + " is online");
+        credits = 0;
 
         // Register agent to directory facilitator
         DFAgentDescription dfd = new DFAgentDescription();
@@ -144,7 +146,7 @@ public class TaxiAgent extends Agent {
     // ---------------------------------------------- Run A* and translate path into moves ---------------------------------------------- */
 
     private Stack<String> executeAStar(){
-        AStar astar = new AStar(locationToNode(locations[0]), locationToNode(locations[1]), worldGraph);
+        AStar astar = new AStar(locationToNode(locations[0]), locationToNode(locations[1]), worldGraph); // TODO : REFACTOR THIS TO WORK FOR NEW LOCATION FIELDS
 
         return astar.compute();
     }

@@ -29,7 +29,7 @@ public class World extends Agent {
     final private int x = 5;
     final private int y = 5;
     final private String[] discreteLoc = {"00", "40", "34", "04"};
-    ArrayList<String> locations = new ArrayList<>(); // 0 : Client Location | 1,2,..,n : Agents locations | n - 1 : Client Destination Location
+    ArrayList<String> locations = new ArrayList<>(); // 0 : Client Location | 1,2,..,n : Agents locations | n - 1 : Client Destination Location TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
     int iteration = 0;
     Node [][] worldGraph;
     Stack<String> messageStack = new Stack<>();
@@ -59,7 +59,7 @@ public class World extends Agent {
         for (int i = 0; i < numberOfAgents; ++i) System.out.println(agentArray[i]);
 
         // Initialize the locations of the agents and the client
-        setLocations(true, "");
+        setLocations(true, ""); // TODO : CHANGE THESE
         // Set clients destination
         setLocations(false, locations.get(0));
 
@@ -83,7 +83,7 @@ public class World extends Agent {
                 // Make sure if there are any messages to be read
                 if (!(msg == null)){
                     // If the message is an action message, update agents position in World
-                    while(msg.getContent().contains("ACTION")){
+                    while(msg.getContent().contains("ACTION")){  // TODO : CHANGE THIS TO WORK FOR MULTIPLE AGENTS
                         String []action = msg.getContent().split(":", 2);
                         System.out.println(msg.getContent());
                         resolveUpdatedLocation(action[1], 1);
@@ -112,7 +112,7 @@ public class World extends Agent {
                             sendMessage("EXECUTE");
                             break;
                         case "SET_STACK":
-                            System.out.println("World will set it's stack");
+                            System.out.println("World will set its stack");
                             break;
                     }
                 }
@@ -150,12 +150,12 @@ public class World extends Agent {
         }
     }
 
-    private void sendLocations(String agentLoc, String goalLoc){
+    private void sendLocations(String agentLoc, String goalLoc){ // TODO: REFACTOR THIS TO SEND AGENT SPECIFIC LOCATION
         String msg = "LOCATIONS," +agentLoc + "," + goalLoc;
         sendMessage(msg);
     }
 
-    private void resolveUpdatedLocation(String move, int agentIndex){
+    private void resolveUpdatedLocation(String move, int agentIndex){ // TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
 
         int xAgent = locations.get(agentIndex).charAt(0) - '0';
         int yAgent = locations.get(agentIndex).charAt(1) - '0';
@@ -195,7 +195,7 @@ public class World extends Agent {
         return;
     }
 
-    private void setLocations(boolean setAgents, String exclude){
+    private void setLocations(boolean setAgents, String exclude){ // TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
         Random rand = new Random();
         String location;
 
