@@ -72,12 +72,12 @@ public class AStar {
         currentNode = goalNode;
         while(!currentNode.location.equals(startNode.location) && currentNode.isVisited){
             path.push(currentNode.parent.getLocation());
-            System.out.println("Parent of " + currentNode.getLocation() + " = " + currentNode.parent.getLocation());
+//            System.out.println("Parent of " + currentNode.getLocation() + " = " + currentNode.parent.getLocation());
             currentNode = currentNode.parent;
         }
-        for (String loc : path) {
-            System.out.println(loc);
-        }
+//        for (String loc : path) {
+//            System.out.println(loc);
+//        }
 
         return path;
     }
