@@ -83,12 +83,12 @@ public class TaxiAgent extends Agent {
                             worldGraph = (Node[][])msg.getContentObject();
                         }
                         else if(msg.getContentObject() instanceof ArrayList<?>){
-                            itineraries = (ArrayList<Itinerary>)msg.getContentObject();
+                            itineraries = (ArrayList<Itinerary>)msg.getContentObject(); // Get list of itineraries from world
                             System.out.println("Computing the best itinerary");
                             itineraryIndex = computeBestItinerary();
                             System.out.println("Best itinerary has index : " + itineraryIndex);
                             setActionStack(paths.get(itineraryIndex));
-                            executeActions();
+                            executeActions(); // TODO : REMOVE THIS. THIS FUNCTION SHOULD RUN AFTER WORLD CHECKS FOR CONFLICTS
                         }
                     } catch (UnreadableException e){e.printStackTrace();}
                 }

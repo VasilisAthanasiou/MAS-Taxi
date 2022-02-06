@@ -26,12 +26,12 @@ public class World extends Agent {
     // World fields
     final private int x = 5;
     final private int y = 5;
-    final private String[] discreteLoc = {"00", "40", "34", "04"};
-    Hashtable<String, String> agentLocations = new Hashtable<>(); // 0 : Client Location | 1,2,..,n : Agents locations | n - 1 : Client Destination Location TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
-    ArrayList<Itinerary> itineraries = new ArrayList<>();
+    final private String[] discreteLoc = {"00", "40", "34", "04"}; // RGBY Locations described in assignment
+    Hashtable<String, String> agentLocations = new Hashtable<>(); // Contains pairs of <agentName, agentLocation>
+    ArrayList<Itinerary> itineraries = new ArrayList<>(); // List of all itineraries. Itineraries are objects that contain the clients current location and their desired destination
     int iteration = 0;
-    Node [][] worldGraph;
-    Stack<String> messageStack = new Stack<>();
+    Node [][] worldGraph; // Node representation of the world. Used for computing shortest path
+    Stack<String> messageStack = new Stack<>(); // Messages the world will send to agents
 
 
     public void setup(){
@@ -171,7 +171,7 @@ public class World extends Agent {
         sendMessage(msg, agentName);
     }
 
-    private void resolveUpdatedLocation(String move, String agentName){ // TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
+    private void resolveUpdatedLocation(String move, String agentName){
 
         int xAgent = agentLocations.get(agentName).charAt(0) - '0';
         int yAgent = agentLocations.get(agentName).charAt(1) - '0';
@@ -211,7 +211,7 @@ public class World extends Agent {
         return;
     }
 
-    private void setLocations(String agentName){ // TODO: CHANGE THIS IMPLEMENTATION TO WORK FOR MULTIPLE AGENTS AND CLIENTS
+    private void setLocations(String agentName){
         Random rand = new Random();
         String clientLocation;
         String clientDestination;
