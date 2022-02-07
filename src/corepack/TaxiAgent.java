@@ -26,13 +26,12 @@ public class TaxiAgent extends Agent {
     ArrayList<Stack<String>> paths = new ArrayList<>();
     int itineraryIndex = -1;
     Node [][] worldGraph;
-    int credits;
+
     // ----------------------------------------------------
 
     public void setup(){
 
         System.out.println("Agent " + getLocalName() + " is online");
-        credits = 0;
 
         // Register agent to directory facilitator
         DFAgentDescription dfd = new DFAgentDescription();
@@ -84,12 +83,19 @@ public class TaxiAgent extends Agent {
                         }
                         else if(msg.getContentObject() instanceof ArrayList<?>){
                             itineraries = (ArrayList<Itinerary>)msg.getContentObject(); // Get list of itineraries from world
+
+                            System.out.println("Compute all paths");
+                            computeAllPaths();
+
                             System.out.println("Computing the best itinerary");
                             itineraryIndex = computeBestItinerary();
 
                             System.out.println("\nBest itinerary has index : " + itineraryIndex);
-                            setActionStack(paths.get(itineraryIndex));
 
+                            String message = "ITINERARY," + String.valueOf(itineraryIndex);
+                            sendMessage(message);
+
+                            setActionStack(paths.get(itineraryIndex));
 
                             executeActions(); // TODO : REMOVE THIS. THIS FUNCTION SHOULD RUN AFTER WORLD CHECKS FOR CONFLICTS
                         }
@@ -160,17 +166,27 @@ public class TaxiAgent extends Agent {
     // Calculate all paths from agents location to clients location and from clients location to its destination and pick the smallest one
     private int computeBestItinerary(){
 
-        Stack<String> clientPath = new Stack<>();
-        Stack<String> destinationPath = new Stack<>();
-
-
         int shortestPathIndex = -1;
         int shortestPathSize = 1000;
 
         // Compute and compare all paths from agent to clients and store the index of the shortest one
-        for (int i = 0; i < itineraries.size(); i++) {
+        for (int i = 0; i < paths.size(); i++) {
 
-            // Ask world for graph. Because copying objects in java is painful
+            if(shortestPathSize == 0 || shortestPathSize > paths.get(i).size()){
+                shortestPathSize = paths.get(i).size();
+                shortestPathIndex = i;
+            }
+
+        }
+        return shortestPathIndex;
+    }
+
+    private void computeAllPaths(){
+        Stack<String> clientPath = new Stack<>();
+        Stack<String> destinationPath = new Stack<>();
+
+        for (int i = 0; i < itineraries.size(); i++){
+            // Ask world for graph
             askForGraph();
             clientPath = executeAStar(location, itineraries.get(i).getClientLocation(), worldGraph);
             System.out.println("\nITERATION : " + i + "\n" + location + " ---> " + itineraries.get(i).getClientLocation() + " | " + itineraries.get(i).getClientLocation()+ " ---> " + itineraries.get(i).getClientDestination() +"\nClient path length : " + clientPath.size());
@@ -178,7 +194,7 @@ public class TaxiAgent extends Agent {
                 System.out.print(loc + " ");
             }
             System.out.println();
-            // Ask world for graph. Because copying objects in java is painful
+            // Ask world for graph
             askForGraph();
             destinationPath = executeAStar(itineraries.get(i).getClientLocation(), itineraries.get(i).getClientDestination(), worldGraph);
 
@@ -187,24 +203,18 @@ public class TaxiAgent extends Agent {
                 System.out.print(loc + " ");
             }
             System.out.println();
-            if(shortestPathSize == 0 || shortestPathSize > clientPath.size() + destinationPath.size()){
-                shortestPathSize = clientPath.size() + destinationPath.size();
-                shortestPathIndex = i;
-            }
 
             int clientPathSize = clientPath.size();
             for (int j = 0; j < clientPathSize; j++) {
                 destinationPath.push(clientPath.get(j));
             }
-            for (String loc : destinationPath) {
-                System.out.print(loc + " ");
-            }
-            System.out.println();
-            paths.add(destinationPath);
-        }
-        return shortestPathIndex;
-    }
 
+            paths.add(destinationPath);
+
+        }
+
+
+    }
     // ---------------------------------------------- Run A* and translate path into moves ---------------------------------------------- */
 
     private Stack<String> executeAStar(String start, String finish, Node [][] graph){

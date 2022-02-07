@@ -29,6 +29,7 @@ public class World extends Agent {
     final private String[] discreteLoc = {"00", "40", "34", "04"}; // RGBY Locations described in assignment
     Hashtable<String, String> agentLocations = new Hashtable<>(); // Contains pairs of <agentName, agentLocation>
     ArrayList<Itinerary> itineraries = new ArrayList<>(); // List of all itineraries. Itineraries are objects that contain the clients current location and their desired destination
+    ArrayList<String[]> itineraryRequests = new ArrayList<>(); // Hashtable of itinerary request messages from agents
     int iteration = 0;
     Node [][] worldGraph; // Node representation of the world. Used for computing shortest path
     Stack<String> messageStack = new Stack<>(); // Messages the world will send to agents
@@ -100,6 +101,17 @@ public class World extends Agent {
                         //System.out.println("World will send graph to Taxi Agent per agents request\n");
                         sendObject(worldGraph);
                     }
+                    else if(msg.getContent().contains("ITINERARY")){
+                        String [] request = new String[2];
+                        request[0] = msg.getSender().getLocalName();
+                        request[1] = msg.getContent().split(",", 2)[1];
+
+                        itineraryRequests.add(request);
+                        if(itineraryRequests.size() == agentArray.length){ // If the world has received requests from all agents
+                            ArrayList<String> conflictingAgents = new ArrayList<>();
+                            conflictingAgents = identifyConflicts();
+                        }
+                    }
                 }
                 // Make sure there are messages to be sent
                 else if(!messageStack.isEmpty()){
@@ -113,14 +125,6 @@ public class World extends Agent {
                             for (String agent: agentArray){ sendLocation(agentLocations.get(agent), agent); } // Send every agent its location
                             sendObject(itineraries); // Send the itineraries to every agent
                             break;
-//                        case "PLAN":
-//                            System.out.println("World asks Taxi Agent to start planning");
-//                            sendMessage("PLAN");
-//                            break;
-//                        case "EXECUTE":
-//                            System.out.println("World asks Taxi Agent to execute plan");
-//                            sendMessage("EXECUTE");
-//                            break;
                         case "SET_STACK":
                             System.out.println("World will set its stack\n");
 
@@ -176,30 +180,6 @@ public class World extends Agent {
         sendMessage(msg, agentName);
     }
 
-    private void resolveUpdatedLocation(String move, String agentName){
-
-        int xAgent = agentLocations.get(agentName).charAt(0) - '0';
-        int yAgent = agentLocations.get(agentName).charAt(1) - '0';
-
-        switch (move){
-            case "UP":
-                yAgent--;
-                agentLocations.put(agentName, agentLocations.get(agentName).charAt(0) + String.valueOf(yAgent));
-                return;
-            case "DOWN":
-                yAgent++;
-                agentLocations.put(agentName, agentLocations.get(agentName).charAt(0) + String.valueOf(yAgent));
-                return;
-            case "LEFT":
-                xAgent--;
-                agentLocations.put(agentName, String.valueOf(xAgent) + agentLocations.get(agentName).charAt(1));
-                return;
-            case "RIGHT":
-                xAgent++;
-                agentLocations.put(agentName, String.valueOf(xAgent) + agentLocations.get(agentName).charAt(1));
-                return;
-        }
-    }
 
     /* -------------------------------------------------------------------------------------------------------------------- */
 
@@ -249,6 +229,44 @@ public class World extends Agent {
             itineraries.add(itin);
         }
         return;
+    }
+
+    private void resolveUpdatedLocation(String move, String agentName){
+
+        int xAgent = agentLocations.get(agentName).charAt(0) - '0';
+        int yAgent = agentLocations.get(agentName).charAt(1) - '0';
+
+        switch (move){
+            case "UP":
+                yAgent--;
+                agentLocations.put(agentName, agentLocations.get(agentName).charAt(0) + String.valueOf(yAgent));
+                return;
+            case "DOWN":
+                yAgent++;
+                agentLocations.put(agentName, agentLocations.get(agentName).charAt(0) + String.valueOf(yAgent));
+                return;
+            case "LEFT":
+                xAgent--;
+                agentLocations.put(agentName, String.valueOf(xAgent) + agentLocations.get(agentName).charAt(1));
+                return;
+            case "RIGHT":
+                xAgent++;
+                agentLocations.put(agentName, String.valueOf(xAgent) + agentLocations.get(agentName).charAt(1));
+                return;
+        }
+    }
+
+    // Compares all itierary requests and returns pairs of conflicting agents
+    private ArrayList<String> identifyConflicts(){
+        ArrayList<String> conflictingAgents = new ArrayList<>();
+        for (int i = 0; i < agentArray.length; i++) {
+            for (int j = i + 1; j < agentArray.length; j++) {
+                if(itineraryRequests.get(i)[1].equals(itineraryRequests.get(j)[1])){
+                    conflictingAgents.add(itineraryRequests.get(i)[0] + ":" + itineraryRequests.get(j)[0]); // Pair of conflicting agent names
+                }
+            }
+        }
+        return conflictingAgents;
     }
 
     /* ----------------------------------------- Create a graph representation of the World --------------------------------------------- */
@@ -313,6 +331,7 @@ public class World extends Agent {
     /* ------- Function meant to draw the world and the agents on it. Agents are represented by their numbers and customers by an asterisk (*) ------------ */
     private void draw(){
 
+//        ArrayList<String> clientLocations = new ArrayList<>();
 //        int xClient = locations.get(0).charAt(0) - '0';
 //        int yClient = locations.get(0).charAt(1) - '0';
 //
@@ -320,11 +339,16 @@ public class World extends Agent {
 //        int xAgent = locations.get(1).charAt(0) - '0';
 //        int yAgent = locations.get(1).charAt(1) - '0';
 //
+//        for (Itinerary it : itineraries) {
+//            clientLocations.add(it.getClientLocation());
+//        }
 //
-//        System.out.println(locations.get(0) + " " + locations.get(1));
 //        for (int j = 0; j < y; j++) {
 //            String line = "";
 //            for (int i = 0; i < x; i++) {
+//                if(){
+//
+//                }
 //                if(xAgent == xClient && yAgent == yClient && xClient == i && yClient == j){
 //                    line += "[1* ]";
 //                }
