@@ -65,8 +65,10 @@ public class TaxiAgent extends Agent {
                             break;
                         case "BID":
                             sendMessage("BID:" + String.valueOf(paths.get(itineraryIndex)));
+                            break;
                         case "EXECUTE":
                             System.out.println(getLocalName() + " will execute plan\n");
+                            setActionStack(paths.get(itineraryIndex));
                             executeActions();
                             break;
                         case "TERMINATE":
@@ -134,8 +136,6 @@ public class TaxiAgent extends Agent {
         int x = initial.charAt(0) - '0';
         int y = initial.charAt(1) - '0';
 
-        System.out.println(x + " " + y);
-
         while(!path.isEmpty()){
             String next = path.pop();
 
@@ -195,7 +195,7 @@ public class TaxiAgent extends Agent {
             // Ask world for graph
             askForGraph();
             clientPath = executeAStar(location, itineraries.get(i).getClientLocation(), worldGraph);
-            System.out.println("\nITERATION : " + i + "\n" + location + " ---> " + itineraries.get(i).getClientLocation() + " | " + itineraries.get(i).getClientLocation()+ " ---> " + itineraries.get(i).getClientDestination() +"\nClient path length : " + clientPath.size());
+            System.out.println("\nITERATION : " + i + " | " + getLocalName() +"\n" + location + " ---> " + itineraries.get(i).getClientLocation() + " | " + itineraries.get(i).getClientLocation()+ " ---> " + itineraries.get(i).getClientDestination() +"\nClient path length : " + clientPath.size());
             for (String loc : clientPath) {
                 System.out.print(loc + " ");
             }

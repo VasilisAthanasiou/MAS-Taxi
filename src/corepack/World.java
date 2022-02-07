@@ -93,7 +93,7 @@ public class World extends Agent {
                     // If the message is an action message, update agents position in World
                     while(msg.getContent().contains("ACTION")){  // TODO : CHANGE THIS TO WORK FOR MULTIPLE AGENTS
                         String []action = msg.getContent().split(":", 2);
-                        System.out.println(msg.getContent());
+                        System.out.println(msg.getSender().getLocalName() + " " + msg.getContent());
                         resolveUpdatedLocation(action[1], msg.getSender().getLocalName());
                         draw();
                         try {Thread.sleep(50);} catch (InterruptedException ie) {System.out.println(ie);}
@@ -115,8 +115,9 @@ public class World extends Agent {
                         }
                         if(!conflictingAgents.isEmpty()){
                             for (String conflict : conflictingAgents) {
+                                System.out.println("CONFLICT :" + conflict);
                                 String [] agents = conflict.split(":", 3);
-                                if(agents.length > 1){
+                                if(agents.length > 2){ // Length must be > 2 because regex using ":" returns one extra element
                                     System.out.println("Conflicting agents : " + conflict);
                                     for (String agent : agents) {
                                         numberOfConflictingAgents = agents.length;
@@ -124,6 +125,7 @@ public class World extends Agent {
                                     }
                                 }
                             }
+                            sendMessage("EXECUTE", msg.getSender().getLocalName());
                         }
                     }
                     else if(msg.getContent().contains("BID")){
@@ -223,8 +225,6 @@ public class World extends Agent {
     // This will be a hardcoded set of messages the World agent will have to communicate to a TaxiAgent
     private void setMessageStack(){
         messageStack.push("SET_STACK");
-        messageStack.push("EXECUTE");
-        messageStack.push("PLAN");
         messageStack.push("SEND_LOCATIONS");
         messageStack.push("SEND_GRAPH");
 
@@ -303,7 +303,10 @@ public class World extends Agent {
                     potentialConflict += itineraryRequests.get(j)[0] + ":";
                 }
             }
-            conflictingAgents.add(potentialConflict);
+            if(!potentialConflict.equals("")){
+                conflictingAgents.add(potentialConflict);
+            }
+
         }
         return conflictingAgents;
     }
