@@ -33,6 +33,8 @@ public class World extends Agent {
     int iteration = 0;
     Node [][] worldGraph; // Node representation of the world. Used for computing shortest path
     Stack<String> messageStack = new Stack<>(); // Messages the world will send to agents
+    int numberOfConflictingAgents;
+    ArrayList<String[]> bids = new ArrayList<>();
 
 
     public void setup(){
@@ -107,10 +109,42 @@ public class World extends Agent {
                         request[1] = msg.getContent().split(",", 2)[1];
 
                         itineraryRequests.add(request);
+                        ArrayList<String> conflictingAgents = new ArrayList<>();
                         if(itineraryRequests.size() == agentArray.length){ // If the world has received requests from all agents
-                            ArrayList<String> conflictingAgents = new ArrayList<>();
                             conflictingAgents = identifyConflicts();
                         }
+                        if(!conflictingAgents.isEmpty()){
+                            for (String conflict : conflictingAgents) {
+                                String [] agents = conflict.split(":", 3);
+                                if(agents.length > 1){
+                                    System.out.println("Conflicting agents : " + conflict);
+                                    for (String agent : agents) {
+                                        numberOfConflictingAgents = agents.length;
+                                        sendMessage("BID", agent);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if(msg.getContent().contains("BID")){
+                        String [] bid = new String[2];
+                        bid[0] = msg.getSender().getLocalName();
+                        bid[1] = msg.getContent().split(":",2)[1];
+
+                        bids.add(bid);
+                        if(bids.size() == numberOfConflictingAgents){
+                            int winningIndex = determineAuctionWinner();
+                            System.out.println("Agent : " + bids.get(winningIndex)[0] + " won the auction");
+                            for (int i = 0; i < numberOfConflictingAgents; i++) {
+                                if(i == winningIndex){
+                                    sendMessage("WON", bids.get(winningIndex)[0]);
+                                }
+                                else {
+                                    sendMessage("LOST", bids.get(i)[0]);
+                                }
+                            }
+                        }
+
                     }
                 }
                 // Make sure there are messages to be sent
@@ -185,6 +219,7 @@ public class World extends Agent {
 
     /* --------------------------------------- World Functions ------------------------------------------------------------ */
 
+    // Run auction
     // This will be a hardcoded set of messages the World agent will have to communicate to a TaxiAgent
     private void setMessageStack(){
         messageStack.push("SET_STACK");
@@ -256,17 +291,35 @@ public class World extends Agent {
         }
     }
 
-    // Compares all itierary requests and returns pairs of conflicting agents
+    // Compares all itinerary requests and returns pairs of conflicting agents
     private ArrayList<String> identifyConflicts(){
         ArrayList<String> conflictingAgents = new ArrayList<>();
-        for (int i = 0; i < agentArray.length; i++) {
-            for (int j = i + 1; j < agentArray.length; j++) {
-                if(itineraryRequests.get(i)[1].equals(itineraryRequests.get(j)[1])){
-                    conflictingAgents.add(itineraryRequests.get(i)[0] + ":" + itineraryRequests.get(j)[0]); // Pair of conflicting agent names
+        String potentialConflict = "";
+
+        for (int i = 0; i < itineraries.size(); i++) {
+            potentialConflict = "";
+            for (int j = 0; j < agentArray.length; j++) {
+                if(itineraryRequests.get(j)[1].equals(String.valueOf(i))){
+                    potentialConflict += itineraryRequests.get(j)[0] + ":";
                 }
             }
+            conflictingAgents.add(potentialConflict);
         }
         return conflictingAgents;
+    }
+
+    private int determineAuctionWinner(){
+        int bestBid = 100;
+        int bestBidIndex = -1;
+
+        for (int i = 0; i < bids.size(); i++) {
+            int currentBid = Integer.valueOf(bids.get(i)[1]);
+            if(currentBid < bestBid){
+                bestBid = currentBid;
+                bestBidIndex = i;
+            }
+        }
+        return bestBidIndex;
     }
 
     /* ----------------------------------------- Create a graph representation of the World --------------------------------------------- */

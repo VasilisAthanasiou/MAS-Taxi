@@ -52,10 +52,19 @@ public class TaxiAgent extends Agent {
 
                 if(!(msg.hasByteSequenceContent())){ // If the message is of type String
                     switch (msg.getContent()){
-//                        case "PLAN":
-//                            System.out.println(getLocalName() + " will start planning\n");
-//                            setActionStack(executeAStar());
-//                            break;
+                        case "WON":
+                            System.out.println(getLocalName() + " won the auction and will start execution of plan\n");
+                            setActionStack(paths.get(itineraryIndex));
+                            executeActions();
+                            break;
+                        case "LOST":
+                            System.out.println(getLocalName() + " lost the auction and will select a different itinerary\n");
+                            itineraryIndex = computeBestItinerary(itineraryIndex);
+                            String message = "ITINERARY," + String.valueOf(itineraryIndex);
+                            sendMessage(message);
+                            break;
+                        case "BID":
+                            sendMessage("BID:" + String.valueOf(paths.get(itineraryIndex)));
                         case "EXECUTE":
                             System.out.println(getLocalName() + " will execute plan\n");
                             executeActions();
@@ -88,16 +97,13 @@ public class TaxiAgent extends Agent {
                             computeAllPaths();
 
                             System.out.println("Computing the best itinerary");
-                            itineraryIndex = computeBestItinerary();
+                            itineraryIndex = computeBestItinerary(-1);
 
                             System.out.println("\nBest itinerary has index : " + itineraryIndex);
 
                             String message = "ITINERARY," + String.valueOf(itineraryIndex);
                             sendMessage(message);
 
-                            setActionStack(paths.get(itineraryIndex));
-
-                            executeActions(); // TODO : REMOVE THIS. THIS FUNCTION SHOULD RUN AFTER WORLD CHECKS FOR CONFLICTS
                         }
                     } catch (UnreadableException e){e.printStackTrace();}
                 }
@@ -164,7 +170,7 @@ public class TaxiAgent extends Agent {
     // -------------------------------------- Figure out which itinerary is best for agent ---------------------------------------------- */
 
     // Calculate all paths from agents location to clients location and from clients location to its destination and pick the smallest one
-    private int computeBestItinerary(){
+    private int computeBestItinerary(int exclude){
 
         int shortestPathIndex = -1;
         int shortestPathSize = 1000;
@@ -172,7 +178,7 @@ public class TaxiAgent extends Agent {
         // Compute and compare all paths from agent to clients and store the index of the shortest one
         for (int i = 0; i < paths.size(); i++) {
 
-            if(shortestPathSize == 0 || shortestPathSize > paths.get(i).size()){
+            if(shortestPathSize == 0 || shortestPathSize > paths.get(i).size() && exclude != i){
                 shortestPathSize = paths.get(i).size();
                 shortestPathIndex = i;
             }
