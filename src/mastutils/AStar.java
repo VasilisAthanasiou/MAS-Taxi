@@ -8,17 +8,12 @@ import java.lang.Double;
 
 public class AStar {
 
-    Node startNode;
-    Node goalNode;
-    Node[][] graph;
 
-    public AStar(Node start, Node goal, Node[][] graph){
-        this.startNode = start;
-        this.goalNode = goal;
-        this.graph = graph;
+    public AStar(){
+
     }
 
-    public Stack<String> compute(){
+    public Stack<String> compute(Node startNode, Node goalNode){
         // Initialize start node
         Node currentNode = startNode;
         currentNode.sLocal = 0;

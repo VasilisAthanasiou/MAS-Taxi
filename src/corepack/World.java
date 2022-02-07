@@ -96,16 +96,20 @@ public class World extends Agent {
                         try {Thread.sleep(50);} catch (InterruptedException ie) {System.out.println(ie);}
                         msg = receive();
                     }
+                    if(msg.getContent().equals("GRAPH")){
+                        //System.out.println("World will send graph to Taxi Agent per agents request\n");
+                        sendObject(worldGraph);
+                    }
                 }
                 // Make sure there are messages to be sent
                 else if(!messageStack.isEmpty()){
                     switch (messageStack.pop()){
                         case "SEND_GRAPH":
-                            System.out.println("World will send graph to Taxi Agent");
+                            System.out.println("World will send graph to Taxi Agent\n");
                             sendObject(worldGraph);
                             break;
                         case "SEND_LOCATIONS":
-                            System.out.println("World will send locations to Taxi Agent");
+                            System.out.println("World will send locations to Taxi Agent\n");
                             for (String agent: agentArray){ sendLocation(agentLocations.get(agent), agent); } // Send every agent its location
                             sendObject(itineraries); // Send the itineraries to every agent
                             break;
@@ -118,17 +122,18 @@ public class World extends Agent {
 //                            sendMessage("EXECUTE");
 //                            break;
                         case "SET_STACK":
-                            System.out.println("World will set its stack");
+                            System.out.println("World will set its stack\n");
+
                             break;
                     }
                 }
                 else{
                     sendMessage("TERMINATE", "EVERYONE");
                     doDelete();
+
                 }
             }
         });
-
     }
 
     /* --------------------------------------- JADE Functions --------------------------------------------------------------*/
@@ -348,7 +353,6 @@ public class World extends Agent {
 //            // System.out.println();
 //        }
 //        System.out.println();
-        System.out.println("DRAW FUNCTION WAS CALLED");
         return;
     }
 }

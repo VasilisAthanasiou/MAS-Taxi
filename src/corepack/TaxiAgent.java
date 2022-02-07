@@ -86,8 +86,11 @@ public class TaxiAgent extends Agent {
                             itineraries = (ArrayList<Itinerary>)msg.getContentObject(); // Get list of itineraries from world
                             System.out.println("Computing the best itinerary");
                             itineraryIndex = computeBestItinerary();
-                            System.out.println("Best itinerary has index : " + itineraryIndex);
+
+                            System.out.println("\nBest itinerary has index : " + itineraryIndex);
                             setActionStack(paths.get(itineraryIndex));
+
+
                             executeActions(); // TODO : REMOVE THIS. THIS FUNCTION SHOULD RUN AFTER WORLD CHECKS FOR CONFLICTS
                         }
                     } catch (UnreadableException e){e.printStackTrace();}
@@ -154,37 +157,83 @@ public class TaxiAgent extends Agent {
     }
     // -------------------------------------- Figure out which itinerary is best for agent ---------------------------------------------- */
 
-    // Calculate all paths from agents location to clients location and pick the smallest one
+    // Calculate all paths from agents location to clients location and from clients location to its destination and pick the smallest one
     private int computeBestItinerary(){
-        Stack<String> shortestPath = new Stack<>();
-        Stack<String> placeholderPath = new Stack<>();
+
+        Stack<String> clientPath = new Stack<>();
+        Stack<String> destinationPath = new Stack<>();
+
+
         int shortestPathIndex = -1;
+        int shortestPathSize = 1000;
 
         // Compute and compare all paths from agent to clients and store the index of the shortest one
         for (int i = 0; i < itineraries.size(); i++) {
-            placeholderPath = executeAStar(location, itineraries.get(i).getClientLocation());
-            if(shortestPath.size() == 0 || shortestPath.size() > placeholderPath.size()){
-                shortestPath = placeholderPath;
+
+            // Ask world for graph. Because copying objects in java is painful
+            askForGraph();
+            clientPath = executeAStar(location, itineraries.get(i).getClientLocation(), worldGraph);
+            System.out.println("\nITERATION : " + i + "\n" + location + " ---> " + itineraries.get(i).getClientLocation() + " | " + itineraries.get(i).getClientLocation()+ " ---> " + itineraries.get(i).getClientDestination() +"\nClient path length : " + clientPath.size());
+            for (String loc : clientPath) {
+                System.out.print(loc + " ");
+            }
+            System.out.println();
+            // Ask world for graph. Because copying objects in java is painful
+            askForGraph();
+            destinationPath = executeAStar(itineraries.get(i).getClientLocation(), itineraries.get(i).getClientDestination(), worldGraph);
+
+            System.out.println("Destination path length = " + destinationPath.size() + "\nSum = " + (clientPath.size() + destinationPath.size()));
+            for (String loc : destinationPath) {
+                System.out.print(loc + " ");
+            }
+            System.out.println();
+            if(shortestPathSize == 0 || shortestPathSize > clientPath.size() + destinationPath.size()){
+                shortestPathSize = clientPath.size() + destinationPath.size();
                 shortestPathIndex = i;
             }
-            paths.add(placeholderPath);
+
+            int clientPathSize = clientPath.size();
+            for (int j = 0; j < clientPathSize; j++) {
+                destinationPath.push(clientPath.get(j));
+            }
+            for (String loc : destinationPath) {
+                System.out.print(loc + " ");
+            }
+            System.out.println();
+            paths.add(destinationPath);
         }
         return shortestPathIndex;
     }
 
     // ---------------------------------------------- Run A* and translate path into moves ---------------------------------------------- */
 
-    private Stack<String> executeAStar(String start, String finish){
-        AStar astar = new AStar(locationToNode(start), locationToNode(finish), worldGraph);
-
-        return astar.compute();
+    private Stack<String> executeAStar(String start, String finish, Node [][] graph){
+        AStar astar = new AStar();
+        return astar.compute(locationToNode(start, graph), locationToNode(finish, graph));
     }
 
-    private Node locationToNode(String location){
+    private Node locationToNode(String location, Node [][] graph){
         int x = location.charAt(0) - '0';
         int y = location.charAt(1) - '0';
-        //System.out.println(x + " " + y);
-        return worldGraph[x][y];
+
+        return graph[x][y];
     }
+
+    private void askForGraph(){
+        sendMessage("GRAPH");
+        ACLMessage msg;
+        try {Thread.sleep(50);} catch (InterruptedException ie) { // Make sure all agents are initialized
+            System.out.println(ie);
+        }
+
+            // Waiting to receive message
+        msg = blockingReceive();
+        try {
+            if(msg.getContentObject() instanceof Node[][]){ // Make sure the received object is a 2D array of Nodes
+                worldGraph = (Node[][])msg.getContentObject();
+            }
+        }catch (UnreadableException e){e.printStackTrace();}
+    }
+
 
 }

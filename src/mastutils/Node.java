@@ -3,7 +3,7 @@ package mastutils;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Node implements Serializable {
+public class Node implements Serializable{
     String location;
     double sGlobal;
     double sLocal;
@@ -13,22 +13,20 @@ public class Node implements Serializable {
     public boolean isVisited;
 
     public Node(String loc){
-        location = loc;
-        neighbours = new ArrayList<Node>();
-        edgeCost = new ArrayList<Double>();
-        sGlobal = 10000.;
-        sLocal = 10000.;
-        parent = null;
-        isVisited = false;
+        this.location = loc;
+        this.neighbours = new ArrayList<Node>();
+        this.edgeCost = new ArrayList<Double>();
+        this.sGlobal = 10000.;
+        this.sLocal = 10000.;
+        this.parent = null;
+        this.isVisited = false;
     }
+
 
     public String getLocation(){
         return this.location;
     }
 
-//    public ArrayList<Integer> getEdgeCost(){
-//        return this.edgeCost;
-//    }
     public void setsGlobal(double value){
         sGlobal = value;
     }
